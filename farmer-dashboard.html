@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Dashboard - AgriBridge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>
+            <div class="logo-container">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AGRIBRIDGE</span>
+            </div>
+            <div class="tagline" data-lang-key="tagline">Connecting Farmers to a Smarter Market.</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 data-lang-key="welcome_farmer">Welcome, Farmer!</h1>
+        <div class="dashboard-buttons">
+            <button id="open-storage-modal" data-lang-key="cold_storage_unit">Cold Storage Unit</button>
+            <button onclick="window.location.href='market-prices.html'" data-lang-key="view_market_prices">View Market Prices</button>
+            <button id="view-condition-btn" data-lang-key="view_condition">View the Condition</button>
+        </div>
+
+        <!-- Cold Storage Request Modal -->
+        <div id="storage-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2 data-lang-key="req_storage">Request Storage Space</h2>
+                <form id="storage-form">
+                    <label for="crop-name" data-lang-key="crop_name">Crop Name:</label>
+                    <input type="text" id="crop-name" required>
+
+                    <label for="quantity" data-lang-key="quantity">Quantity (in kg):</label>
+                    <input type="number" id="quantity" required>
+
+                    <button type="button" id="check-space-btn" data-lang-key="check_space">Check for Storage Space</button>
+                    <p id="space-status"></p>
+
+                    <button type="submit" data-lang-key="submit_req">Submit Request</button>
+                </form>
+                <p id="storage-reply" class="hidden"></p>
+            </div>
+        </div>
+
+        <!-- View Condition Section -->
+        <div id="condition-info" class="hidden">
+            <h2 data-lang-key="crop_conditions">Crop Conditions</h2>
+            <p id="condition-data" data-lang-key="no_crops_stored">You have no crops currently in storage.</p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+        </div>
+        <p data-lang-key="contact_us"></p>
+    </footer>
+
+    <script src="translations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

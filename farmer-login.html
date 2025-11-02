@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Login - AgriBridge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>
+            <div class="logo-container">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AGRIBRIDGE</span>
+            </div>
+            <div class="tagline" data-lang-key="tagline">Connecting Farmers to a Smarter Market.</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="login-form-container">
+            <h2 data-lang-key="farmer_login">Farmer Login</h2>
+            <form id="login-form">
+                <label for="name" data-lang-key="name">Name:</label>
+                <input type="text" id="name" required>
+
+                <label for="phone" data-lang-key="phone">Phone Number:</label>
+                <input type="tel" id="phone" required placeholder="e.g., 9876543210">
+                <div id="phone-error" class="error-message"></div>
+
+                <label for="email" data-lang-key="email">Email (Optional):</label>
+                <input type="email" id="email">
+
+                <button type="submit" data-lang-key="send_otp">Send OTP</button>
+            </form>
+        </div>
+
+        <div id="otp-container" class="hidden">
+            <h2 data-lang-key="verify_otp">Verify OTP</h2>
+            <p data-lang-key="otp_sent_to">An OTP has been sent to your phone number.</p>
+            <form id="otp-form">
+                <input type="text" id="otp-input" required maxlength="6">
+                <div id="otp-error" class="error-message"></div>
+                <button type="submit" data-lang-key="verify">Verify</button>
+            </form>
+            <div class="otp-timer">
+                <span id="timer" data-lang-key="time_left">Time left: 3:00</span>
+                <button id="resend-otp" disabled data-lang-key="resend_otp">Resend OTP</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+        </div>
+        <p data-lang-key="contact_us"></p>
+    </footer>
+
+    <script src="translations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

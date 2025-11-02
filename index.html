@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to AgriBridge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>
+            <div class="logo-container">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AGRIBRIDGE</span>
+            </div>
+            <div class="tagline" data-lang-key="tagline">Connecting Farmers to a Smarter Market.</div>
+        </div>
+        <div class="language-selector">
+            <button onclick="setLanguage('en')">English</button>
+            <button onclick="setLanguage('kn')">ಕನ್ನಡ</button>
+            <button onclick="setLanguage('hi')">हिन्दी</button>
+        </div>
+    </header>
+
+    <div class="container selection-container">
+        <h1 data-lang-key="select_role">Select Your Role</h1>
+        <div class="role-selection">
+            <a href="farmer-login.html" class="role-card">
+                <h2 data-lang-key="farmer">Farmer</h2>
+            </a>
+            <a href="wholesaler-login.html" class="role-card">
+                <h2 data-lang-key="wholesaler">Wholesaler/Retailer</h2>
+            </a>
+            <a href="cold-storage-login.html" class="role-card">
+                <h2 data-lang-key="cold_storage">Cold Storage Unit</h2>
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+        </div>
+        <p data-lang-key="contact_us"></p>
+    </footer>
+
+    <script src="translations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cold Storage Dashboard - AgriBridge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>
+            <div class="logo-container">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AGRIBRIDGE</span>
+            </div>
+            <div class="tagline" data-lang-key="tagline">Connecting Farmers to a Smarter Market.</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 data-lang-key="storage_requests">Farmer Storage Requests</h1>
+        <div id="requests-list">
+            <!-- Farmer requests will be loaded here by JavaScript -->
+        </div>
+
+        <!-- Update Condition Modal -->
+        <div id="update-modal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close-button">&times;</span>
+                <h2 data-lang-key="update_crop_condition">Update Crop Condition</h2>
+                <form id="update-condition-form">
+                    <input type="hidden" id="request-id">
+                    <label for="condition-input" data-lang-key="condition_details">Condition Details:</label>
+                    <textarea id="condition-input" rows="4" required></textarea>
+                    <button type="submit" data-lang-key="save_condition">Save Condition</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+        </div>
+        <p data-lang-key="contact_us"></p>
+    </footer>
+
+    <script src="translations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

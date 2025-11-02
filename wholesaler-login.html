@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wholesaler Login - AgriBridge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>
+            <div class="logo-container">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AGRIBRIDGE</span>
+            </div>
+            <div class="tagline" data-lang-key="tagline">Connecting Farmers to a Smarter Market.</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="login-form-container">
+            <h2 data-lang-key="wholesaler_login">Wholesaler Login</h2>
+            <form id="wholesaler-login-form">
+                <label for="wholesaler-id" data-lang-key="wholesaler_id">Wholesaler ID:</label>
+                <input type="text" id="wholesaler-id" required placeholder="e.g., WHOLE01">
+                <div id="login-error" class="error-message"></div>
+                <button type="submit" data-lang-key="login">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+        </div>
+        <p data-lang-key="contact_us"></p>
+    </footer>
+
+    <script src="translations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

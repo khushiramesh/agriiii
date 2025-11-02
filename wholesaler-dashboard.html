@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wholesaler Dashboard - AgriBridge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div>
+            <div class="logo-container">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AGRIBRIDGE</span>
+            </div>
+            <div class="tagline" data-lang-key="tagline">Connecting Farmers to a Smarter Market.</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 data-lang-key="wholesaler_dashboard">Wholesaler Dashboard</h1>
+
+        <div class="dashboard-section">
+            <h2 data-lang-key="your_details">Your Details</h2>
+            <form id="details-update-form">
+                <label for="wholesaler-name" data-lang-key="wholesaler_name">Name:</label>
+                <input type="text" id="wholesaler-name" required>
+                <label for="wholesaler-location" data-lang-key="location">Location:</label>
+                <input type="text" id="wholesaler-location" required>
+                <label for="wholesaler-payment" data-lang-key="payment_procedure_label">Payment Procedure:</label>
+                <textarea id="wholesaler-payment" rows="3" required></textarea>
+                <button type="submit" data-lang-key="update_details">Update Details</button>
+            </form>
+        </div>
+
+        <div class="dashboard-section">
+            <h2 data-lang-key="set_crop_prices">Set Crop Prices</h2>
+            <form id="price-update-form">
+                <div id="crop-pricing-list"></div>
+                <button type="submit" data-lang-key="update_prices">Update Prices</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+        </div>
+        <p data-lang-key="contact_us"></p>
+    </footer>
+
+    <script src="translations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
