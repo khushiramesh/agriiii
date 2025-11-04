@@ -17,16 +17,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function startTimer() {
         let timeLeft = 180; // 3 minutes
         resendBtn.disabled = true;
+        timerEl.textContent = `Seconds left: ${timeLeft}`;
         otpTimer = setInterval(() => {
             timeLeft--;
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            const currentLang = localStorage.getItem('language') || 'en';
-            timerEl.textContent = `${translations[currentLang].time_left.split(':')[0]}: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            timerEl.textContent = `Seconds left: ${timeLeft}`;
 
             if (timeLeft <= 0) {
                 clearInterval(otpTimer);
                 resendBtn.disabled = false;
+                timerEl.textContent = 'Time up, you can resend OTP';
             }
         }, 1000);
     }
