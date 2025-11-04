@@ -1,47 +1,30 @@
 import os
 import random
-import smtplib
-from email.mime.text import MIMEText
-from datetime import datetime, timedelta
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_mail import Mail, Message
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
-
-EMAIL_USER = os.getenv("EMAIL_USER")
-EMAIL_PASS = os.getenv("EMAIL_PASS")
 
 app = Flask(__name__)
 app.secret_key = 'a_strong_random_secret'  # set from env in production
 CORS(app)
 
+# Flask-Mail configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.getenv("EMAIL_USER")
+app.config['MAIL_PASSWORD'] = os.getenv("EMAIL_PASS")
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv("EMAIL_USER")
+app.config['MAIL_USE_SSL'] = False
+
+mail = Mail(app)
+
 # In-memory store for OTPs (for production use DB or cache)
 otp_store = {}  # key: email, value: { otp: '123456', expires: datetime }
-
-def generate_otp():
-    return str(random.randint(100000, 999999))
-
-def send_email_otp(receiver_email):
-    otp = generate_otp()
-    msg = MIMEText(f"Your AgriBridge OTP is: {otp}\nIt is valid for 3 minutes.")
-    msg['Subject'] = "AgriBridge OTP Code"
-    msg['From'] = EMAIL_USER
-    msg['To'] = receiver_email
-
-    try:
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.ehlo()
-            server.starttls()
-            server.login(EMAIL_USER, EMAIL_PASS)
-            server.send_message(msg)
-
-        # store OTP with expiry
-        expiry = datetime.utcnow() + timedelta(minutes=3)
-        otp_store[receiver_email] = {'otp': otp, 'expires': expiry, 'tries': 0}
-        return True, otp  # return otp only for demo; in production return True
-    except Exception as e:
-        return False, str(e)
 
 # In-memory storage for demo purposes (replace with database in production)
 farmer_requests = []
@@ -51,45 +34,48 @@ wholesalers = {
 }
 crop_prices = {}
 
-@app.route('/api/send-email-otp', methods=['POST'])
-def api_send_email_otp():
+@app.route('/api/send-otp', methods=['POST'])
+def send_otp():
     data = request.get_json() or request.form
     email = data.get('email')
     if not email:
-        return jsonify({'error':'Email required'}), 400
+        return jsonify({'error': 'Email is required'}), 400
 
-    success, info = send_email_otp(email)
-    if success:
-        # For local demo, we can return the OTP (remove for production)
-        return jsonify({'message':'OTP sent', 'demo_otp': info}), 200
-    else:
-        return jsonify({'error': 'Failed to send OTP', 'details': info}), 500
+    otp = str(random.randint(100000, 999999))
+    expiry_time = datetime.now() + timedelta(minutes=5)  # OTP valid for 5 minutes
 
-@app.route('/api/verify-email-otp', methods=['POST'])
-def api_verify_email_otp():
+    otp_store[email] = {'otp': otp, 'expires': expiry_time}
+
+    # send email
+    msg = Message('Your OTP Code', sender=os.getenv("EMAIL_USER"), recipients=[email])
+    msg.body = f"Your OTP is {otp}. It expires in 5 minutes."
+    try:
+        mail.send(msg)
+        return jsonify({'message': 'OTP sent successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/verify-otp', methods=['POST'])
+def verify_otp():
     data = request.get_json() or request.form
     email = data.get('email')
-    entered_otp = data.get('otp')
-    if not email or not entered_otp:
-        return jsonify({'error': 'Email and OTP required'}), 400
+    user_otp = data.get('otp')
 
-    record = otp_store.get(email)
-    if not record:
-        return jsonify({'error': 'No OTP found for this email'}), 400
+    if email not in otp_store:
+        return jsonify({'error': 'No OTP sent to this email'}), 400
 
-    if datetime.utcnow() > record['expires']:
+    stored_otp = otp_store[email]['otp']
+    expires = otp_store[email]['expires']
+
+    if datetime.now() > expires:
         del otp_store[email]
         return jsonify({'error': 'OTP expired'}), 400
 
-    if record['otp'] == entered_otp:
-        del otp_store[email]
-        # log user in or create session as needed
-        session['user_email'] = email
-        return jsonify({'message':'OTP verified'}), 200
+    if user_otp == stored_otp:
+        del otp_store[email]  # OTP used, remove it
+        return jsonify({'message': 'OTP verified successfully'})
     else:
-        record['tries'] = record.get('tries', 0) + 1
-        # optional: block after N tries
-        return jsonify({'error':'Invalid OTP'}), 400
+        return jsonify({'error': 'Invalid OTP'}), 400
 
 @app.route('/api/check-space', methods=['POST'])
 def check_space():

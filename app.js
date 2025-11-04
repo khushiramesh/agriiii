@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Define the base URL for your Python backend
     const API_BASE_URL = 'http://127.0.0.1:5000';
 
@@ -34,16 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const phone = document.getElementById('phone').value;
-        const phoneErrorEl = document.getElementById('phone-error');
+        const email = document.getElementById('email').value;
+        const emailErrorEl = document.getElementById('email-error');
 
         // Clear previous errors
-        phoneErrorEl.textContent = '';
+        emailErrorEl.textContent = '';
 
-        // Validate phone number length
-        const currentLang = localStorage.getItem('language') || 'en';
-        if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
-            phoneErrorEl.textContent = translations[currentLang].invalid_phone;
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            emailErrorEl.textContent = 'Please enter a valid email address.';
             return; // Stop the function
         }
 
@@ -51,18 +51,15 @@ if (loginForm) {
         const response = await fetch(`${API_BASE_URL}/api/send-otp`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: phone })
+            body: JSON.stringify({ email: email })
         });
 
         if (response.ok) {
-            const data = await response.json();
-            console.log(`OTP for testing: ${data.otp_for_testing}`); // For development only
             loginFormContainer.classList.add('hidden');
             otpContainer.classList.remove('hidden');
             startTimer();
         } else {
-            const currentLang = localStorage.getItem('language') || 'en';
-            alert(translations[currentLang].otp_send_failed);
+            alert('Failed to send OTP. Please try again.');
         }
     });
 }
@@ -71,15 +68,14 @@ if (loginForm) {
 if (resendBtn) {
     resendBtn.addEventListener('click', async () => {
         clearInterval(otpTimer);
-        const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
         const response = await fetch(`${API_BASE_URL}/api/send-otp`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone: phone })
+            body: JSON.stringify({ email: email })
         });
         if (response.ok) {
-            const currentLang = localStorage.getItem('language') || 'en';
-            alert(translations[currentLang].otp_resent);
+            alert('OTP resent successfully.');
             startTimer();
         }
     });
@@ -89,20 +85,19 @@ if (resendBtn) {
 if (otpForm) {
     otpForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
         const otp = document.getElementById('otp-input').value;
 
         const response = await fetch(`${API_BASE_URL}/api/verify-otp`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone, otp })
+            body: JSON.stringify({ email, otp })
         });
 
         if (response.ok) {
             window.location.href = 'farmer-dashboard.html';
         } else {
-            const currentLang = localStorage.getItem('language') || 'en';
-            otpErrorEl.textContent = translations[currentLang].invalid_otp;
+            otpErrorEl.textContent = 'Invalid OTP';
         }
     });
 }
