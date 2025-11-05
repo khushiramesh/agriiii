@@ -1,6 +1,6 @@
-# TODO: Replace Twilio SMS OTP with Email OTP
+# TODO: Email OTP System Setup and Testing
 
-## Steps to Complete
+## Completed Steps
 - [x] Backup backend.py
 - [x] Remove Twilio usage from backend.py (imports, initialization, SMS lines)
 - [x] Add email OTP helper functions to backend.py (generate_otp, send_email_otp)
@@ -18,4 +18,11 @@
 - [x] Test email OTP end-to-end (requires valid Gmail App Password)
 - [x] Verify all backend endpoints
 - [x] Finalize documentation (update README.md)
-- [ ] Commit and push changes to GitHub
+- [x] Commit and push changes to GitHub
+
+## Next Steps
+- [x] Set up the .env file with EMAIL_USER, EMAIL_PASS, and SECRET_KEY
+- [x] Test email OTP end-to-end (send and verify)
+- [x] Verify all backend endpoints are working
+- [x] Finalize documentation
+- [x] Remove Twilio references from README.md
