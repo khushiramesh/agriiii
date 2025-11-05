@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'a_strong_random_secret'  # set from env in production
+app.secret_key = os.getenv("SECRET_KEY", 'a_strong_random_secret')
 CORS(app)
 
 # Flask-Mail configuration

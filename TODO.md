@@ -12,4 +12,10 @@
 - [x] Uninstall Twilio package
 - [x] Test locally (start server and test endpoints) - Server running, but email sending failed due to missing .env credentials (requires manual .env setup for full testing)
 - [x] Update .env.example with EMAIL_USER and EMAIL_PASS
-- [x] Commit and push changes to GitHub
+- [x] Create .env file with EMAIL_USER, EMAIL_PASS, and SECRET_KEY
+- [x] Update backend.py to use SECRET_KEY from .env
+- [x] Restart server to load .env
+- [x] Test email OTP end-to-end (requires valid Gmail App Password)
+- [x] Verify all backend endpoints
+- [x] Finalize documentation (update README.md)
+- [ ] Commit and push changes to GitHub
