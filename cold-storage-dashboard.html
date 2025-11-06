@@ -23,19 +23,12 @@
             <!-- Farmer requests will be loaded here by JavaScript -->
         </div>
 
-        <!-- Update Condition Modal -->
-        <div id="update-modal" class="modal hidden">
-            <div class="modal-content">
-                <span class="close-button">&times;</span>
-                <h2 data-lang-key="update_crop_condition">Update Crop Condition</h2>
-                <form id="update-condition-form">
-                    <input type="hidden" id="request-id">
-                    <label for="condition-input" data-lang-key="condition_details">Condition Details:</label>
-                    <textarea id="condition-input" rows="4" required></textarea>
-                    <button type="submit" data-lang-key="save_condition">Save Condition</button>
-                </form>
-            </div>
-        </div>
+        <h2>Update Crop Condition</h2>
+        <form id="update-condition-form">
+            <label for="condition-input" data-lang-key="condition_details">Condition Details:</label>
+            <textarea id="condition-input" rows="4" required placeholder="Enter the condition of the farmer's fruits or vegetables"></textarea>
+            <button type="submit" data-lang-key="save_condition">Save Condition</button>
+        </form>
     </div>
 
     <footer>

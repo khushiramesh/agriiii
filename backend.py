@@ -1,14 +1,18 @@
 import os
 import random
-from flask import Flask, request, jsonify
+import requests
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from flask_mail import Mail, Message
+from flask_socketio import SocketIO
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+from apscheduler.schedulers.background import BackgroundScheduler
 
 load_dotenv()
 
 app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins="*")
 app.secret_key = os.getenv("SECRET_KEY", 'a_strong_random_secret')
 CORS(app)
 
@@ -32,7 +36,10 @@ wholesalers = {
     'WS001': {'name': 'Wholesaler A', 'location': 'Delhi', 'payment_procedure': 'Cash on Delivery'},
     'WS002': {'name': 'Wholesaler B', 'location': 'Mumbai', 'payment_procedure': 'Online Payment'}
 }
-crop_prices = {}
+crop_prices = {} # Prices set by wholesalers
+
+# In-memory store for real-time market prices (simulating a database)
+market_prices_store = []
 
 @app.route('/api/send-otp', methods=['POST'])
 def send_otp():
@@ -187,19 +194,8 @@ def update_prices():
 
 @app.route('/api/get-market-prices', methods=['GET'])
 def get_market_prices():
-    prices_list = []
-    for ws_id, prices in crop_prices.items():
-        ws_details = wholesalers[ws_id]
-        for crop, price in prices.items():
-            prices_list.append({
-                'crop_name': crop,
-                'price': price,
-                'name': ws_details['name'],
-                'location': ws_details['location'],
-                'location_url': f'https://www.google.com/maps/search/{ws_details["location"]}',
-                'payment_procedure': ws_details['payment_procedure']
-            })
-    return jsonify(prices_list), 200
+    # This now returns the centrally fetched market prices
+    return jsonify(market_prices_store), 200
 
 @app.route('/api/get-test-otp', methods=['GET'])
 def get_test_otp():
@@ -208,5 +204,68 @@ def get_test_otp():
         return jsonify({'otp': otp_store[email]['otp']}), 200
     return jsonify({'error': 'No OTP found'}), 404
 
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
+
+@app.route('/<path:path>')
+def static_files(path):
+    return send_from_directory('.', path)
+
+def fetch_and_update_market_prices():
+    """
+    Fetches real-time market prices from an external API (e.g., Agmarknet)
+    and updates the central price store.
+    """
+    global market_prices_store
+    
+    # Store old prices to compare for changes
+    old_prices = {item['crop_name']: item['price'] for item in market_prices_store}
+
+    try:
+        # NOTE: This is a placeholder URL. You must verify and use the correct, working API endpoint.
+        # For testing, you can use a mock API service that returns data in your expected format.
+        api_url = "http://api.agmarknet.gov.in/v1/marketprices"
+        # It's good practice to set a timeout for external API calls.
+        response = requests.get(api_url, timeout=10)
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+        api_data = response.json()
+
+        new_prices = []
+        # IMPORTANT: Adjust the keys ('commodity', 'price', 'arrival_date') based on the actual API response.
+        for item in api_data.get('records', []): # Assuming the data is in a 'records' key
+            crop_name = item.get('commodity')
+            current_price = float(item.get('price', 0))
+            
+            change = 0 # 0 for no change, 1 for up, -1 for down
+            if crop_name in old_prices:
+                if current_price > old_prices[crop_name]:
+                    change = 1
+                elif current_price < old_prices[crop_name]:
+                    change = -1
+
+            new_prices.append({
+                'crop_name': item['commodity'],
+                'price': float(item['price']),
+                'last_updated': item['arrival_date'],
+                'change': change
+            })
+        
+        market_prices_store = new_prices
+        print(f"Successfully fetched and processed market prices at {datetime.now()}")
+
+    except requests.exceptions.Timeout:
+        print(f"Error: The request to the market API timed out.")
+        return
+    except requests.exceptions.RequestException as e: # Catches connection errors, 404s, 500s etc.
+        print(f"Error fetching market prices from API: {e}. Using cached data if available.")
+        return  # Exit the function if fetching fails
+
+    socketio.emit('price_update', market_prices_store)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=fetch_and_update_market_prices, trigger="interval", minutes=15)
+    scheduler.start()
+    fetch_and_update_market_prices() # Run once on startup
+    socketio.run(app, debug=True)

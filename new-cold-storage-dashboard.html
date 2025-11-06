@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cold Storage Dashboard - AgriBridge</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .dashboard-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        .dashboard-container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .farmer-list {
+            margin-bottom: 20px;
+        }
+        .farmer-item {
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .farmer-item input[type="radio"] {
+            margin-right: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            resize: vertical;
+        }
+        .btn {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #218838;
+        }
+        .success-message {
+            color: green;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <div class="logo-container">
+                <div class="logo-icon"></div>
+                <span class="logo-text">AGRIBRIDGE</span>
+            </div>
+            <div class="tagline" data-lang-key="tagline">Connecting Farmers to a Smarter Market.</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="dashboard-container">
+            <h1 data-lang-key="storage_requests">Farmer Storage Requests</h1>
+            <div id="new-farmer-list" class="farmer-list">
+                <!-- Farmer requests will be loaded here by JavaScript -->
+            </div>
+            <form id="new-update-condition-form">
+                <div class="form-group">
+                    <label for="new-condition-input" data-lang-key="condition_details">Condition Details:</label>
+                    <textarea id="new-condition-input" rows="4" required placeholder="Enter the condition of the farmer's fruits or vegetables"></textarea>
+                </div>
+                <button type="submit" class="btn" data-lang-key="save_condition">Save Condition</button>
+                <div id="new-update-message" class="success-message"></div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About Us</a>
+        </div>
+        <p data-lang-key="contact_us"></p>
+    </footer>
+
+    <script src="translations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

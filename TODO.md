@@ -1,8 +1,6 @@
-- [x] Remove "View Market Prices" button from farmer-dashboard.html
-- [x] Add farmer name input field in storage modal in farmer-dashboard.html
-- [x] Store farmer email in localStorage after OTP verification in app.js
-- [x] Include email in submit-storage API call in app.js
-- [x] Update view-condition logic to fetch farmer's requests and display conditions in app.js
-- [x] Modify submit-storage in backend.py to include email in farmer_requests
-- [x] Update get-farmer-requests in backend.py to filter by email if provided
-- [x] Test the updated functionality
+# TODO for Cold Storage Unit Management Interface
+
+## Tasks
+- [x] Modify cold-storage-dashboard.html: Change the requests list to display farmer requests with radio buttons for selecting one request at a time, remove the modal, and add a form below the list for entering condition details
+- [x] Update app.js: Modify the cold storage dashboard logic to handle radio button selection (store selected request ID), and update the form submission to use the selected request ID for updating condition
+- [ ] Test the interface: Run the app, login as cold storage, select a farmer, enter condition, save, then check farmer dashboard to verify condition is viewable

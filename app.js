@@ -198,8 +198,8 @@ if (viewConditionBtn) {
 
     // --- Cold Storage Dashboard Logic ---
     const requestsList = document.getElementById('requests-list');
-    const updateModal = document.getElementById('update-modal');
     const updateForm = document.getElementById('update-condition-form');
+    let selectedRequestId = null;
 
     if (requestsList) {
         // Fetch and display farmer requests when the dashboard loads
@@ -207,36 +207,41 @@ if (viewConditionBtn) {
         const requests = await response.json();
         requestsList.innerHTML = requests.map(req => `
             <div class="request-item">
-                <p><b>Request ID:</b> ${req.id}</p>
-                <p><b>Crop:</b> ${req.crop_name} (${req.quantity} kg)</p>
-                <p><b>Current Condition:</b> ${req.condition}</p>
-                <button class="update-btn" data-id="${req.id}">Update Condition</button>
+                <input type="radio" name="farmer-select" value="${req.id}" id="req-${req.id}">
+                <label for="req-${req.id}">
+                    <p><b>Farmer:</b> ${req.farmer_name}</p>
+                    <p><b>Crop:</b> ${req.crop_name} (${req.quantity} kg)</p>
+                    <p><b>Current Condition:</b> ${req.condition}</p>
+                </label>
             </div>
         `).join('');
 
-        // Add event listeners to "Update" buttons
-        document.querySelectorAll('.update-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const requestId = e.target.dataset.id;
-                document.getElementById('request-id').value = requestId;
-                updateModal.classList.remove('hidden');
+        // Add event listeners to radio buttons
+        document.querySelectorAll('input[name="farmer-select"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                selectedRequestId = parseInt(e.target.value);
             });
         });
-
-        // Handle modal close
-        updateModal.querySelector('.close-button').addEventListener('click', () => updateModal.classList.add('hidden'));
 
         // Handle form submission for updating condition
         updateForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const requestId = parseInt(document.getElementById('request-id').value);
+            if (!selectedRequestId) {
+                alert('Please select a farmer first.');
+                return;
+            }
             const condition = document.getElementById('condition-input').value;
-            await fetch(`${API_BASE_URL}/api/update-condition`, {
+            const updateResponse = await fetch(`${API_BASE_URL}/api/update-condition`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ request_id: requestId, condition: condition })
+                body: JSON.stringify({ request_id: selectedRequestId, condition: condition })
             });
-            window.location.reload(); // Reload to see the changes
+            if (updateResponse.ok) {
+                alert('Condition updated successfully.');
+                window.location.reload(); // Reload to see the changes
+            } else {
+                alert('Failed to update condition.');
+            }
         });
     }
 
@@ -335,29 +340,93 @@ if (viewConditionBtn) {
 
     // --- Market Prices Page Logic (for Farmers) ---
     const marketPricesList = document.getElementById('market-prices-list');
-    if (marketPricesList) {
-        const response = await fetch(`${API_BASE_URL}/api/get-market-prices`);
-        const prices = await response.json();
-        const currentLang = localStorage.getItem('language') || 'en';
+    const notificationContainer = document.getElementById('notification-container');
 
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.classList.add('notification');
+        notification.textContent = message;
+        notificationContainer.appendChild(notification);
+
+        // Remove the notification after a few seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 5000);
+    }
+
+    // Add CSS for notifications (in style.css)
+    /*
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #4CAF50;
+        color: white;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1000;
+    }
+    */
+
+
+    function renderMarketPrices(prices) {
+        const currentLang = localStorage.getItem('language') || 'en';
         if (prices.length === 0) {
             marketPricesList.innerHTML = '<p>No market prices have been set yet. Please check back later.</p>';
         } else {
-            marketPricesList.innerHTML = prices.map(item => `
-                <div class="price-item">
+            // Sort by crop name for consistent ordering
+            prices.sort((a, b) => a.crop_name.localeCompare(b.crop_name));
+
+            marketPricesList.innerHTML = prices.map(item => {
+                let changeIndicator = '';
+                let priceClass = '';
+                // item.change: 1 for up, -1 for down, 0 for no change
+                if (item.change === 1) {
+                    changeIndicator = '<span class="price-up">▲</span>'; // Up arrow
+                    priceClass = 'price-up';
+                } else if (item.change === -1) {
+                    changeIndicator = '<span class="price-down">▼</span>'; // Down arrow
+                    priceClass = 'price-down';
+                }
+
+                return `
+                <div class="price-item ${priceClass}">
                     <div class="price-details">
                         <h3>${item.crop_name}</h3>
-                        <p class="price-value">₹${item.price.toFixed(2)} / kg</p>
+                        <p class="price-value">
+                            ₹${item.price.toFixed(2)} / kg ${changeIndicator}
+                        </p>
                     </div>
                     <div class="wholesaler-details">
-                        <p><b>Wholesaler:</b> ${item.name}</p>
-                        <p><b>Location:</b> ${item.location}</p>
-                        <p><a href="${item.location_url}" target="_blank" class="map-link">${translations[currentLang].view_on_map}</a></p>
-                        <p><b>${translations[currentLang].payment_procedure}</b> ${item.payment_procedure}</p>
+                        <p>Official Market Rate</p>
+                        <p>Last updated: ${new Date(item.last_updated).toLocaleTimeString()}</p>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
+    }
+
+    if (marketPricesList) {
+        // Initial fetch via HTTP
+        const response = await fetch(`${API_BASE_URL}/api/get-market-prices`);
+        const prices = await response.json();
+        renderMarketPrices(prices);
+
+        // Connect to WebSocket for real-time updates
+        const socket = io(API_BASE_URL);
+        socket.on('price_update', function(updatedPrices) {
+            console.log("Market Update Received:", updatedPrices);
+            
+            // Show notifications for any crop that has changed price
+            updatedPrices.forEach(item => {
+                if (item.change !== 0) { // If price went up or down
+                    const direction = item.change === 1 ? 'increased' : 'decreased';
+                    showNotification(`${item.crop_name} price has ${direction} to ₹${item.price.toFixed(2)}`);
+                }
+            });
+
+            renderMarketPrices(updatedPrices);
+        });
     }
 
 });
