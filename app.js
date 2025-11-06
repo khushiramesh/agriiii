@@ -95,6 +95,7 @@ if (otpForm) {
         });
 
         if (response.ok) {
+            localStorage.setItem('farmerEmail', email);
             window.location.href = 'farmer-dashboard.html';
         } else {
             otpErrorEl.textContent = 'Invalid OTP';
@@ -135,18 +136,20 @@ if (checkSpaceBtn) {
 if (storageForm) {
     storageForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const farmerName = document.getElementById('farmer-name').value;
         const cropName = document.getElementById('crop-name').value;
         const quantity = document.getElementById('quantity').value;
+        const email = localStorage.getItem('farmerEmail');
 
         const response = await fetch(`${API_BASE_URL}/api/submit-storage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ crop_name: cropName, quantity: quantity })
+            body: JSON.stringify({ farmer_name: farmerName, crop_name: cropName, quantity: quantity, email: email })
         });
 
         if (response.ok) {
-            const currentLang = localStorage.getItem('language') || 'en';
-            storageReplyEl.textContent = translations[currentLang].req_sent;
+            const data = await response.json();
+            storageReplyEl.textContent = data.message;
             storageReplyEl.classList.remove('hidden');
             setTimeout(() => storageModal.classList.add('hidden'), 2000);
         }
@@ -154,19 +157,21 @@ if (storageForm) {
 }
 if (viewConditionBtn) {
     viewConditionBtn.addEventListener('click', async () => {
-        // Fetch data from the Python backend
-        const response = await fetch(`${API_BASE_URL}/api/crop-condition`);
-        const data = await response.json();
-        const currentLang = localStorage.getItem('language') || 'en';
-        
-        if (data.message_key) {
-            // If the backend sends a key, translate it
-            conditionData.textContent = translations[currentLang][data.message_key];
+        const email = localStorage.getItem('farmerEmail');
+        const response = await fetch(`${API_BASE_URL}/api/get-farmer-requests?email=${encodeURIComponent(email)}`);
+        const requests = await response.json();
+
+        if (requests.length === 0) {
+            conditionData.textContent = 'You have no crops currently in storage.';
         } else {
-            // Otherwise, display the direct message
-            conditionData.textContent = data.message;
+            conditionData.innerHTML = requests.map(req => `
+                <div>
+                    <p><b>Crop:</b> ${req.crop_name} (${req.quantity} kg)</p>
+                    <p><b>Condition:</b> ${req.condition}</p>
+                </div>
+            `).join('');
         }
-        
+
         conditionInfo.classList.toggle('hidden');
     });
 }

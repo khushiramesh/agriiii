@@ -86,19 +86,23 @@ def check_space():
 @app.route('/api/submit-storage', methods=['POST'])
 def submit_storage():
     data = request.json
+    farmer_name = data.get('farmer_name')
     crop_name = data.get('crop_name')
     quantity = data.get('quantity')
-    if not crop_name or not quantity:
-        return jsonify({'error': 'Crop name and quantity required'}), 400
+    email = data.get('email')
+    if not farmer_name or not crop_name or not quantity or not email:
+        return jsonify({'error': 'Farmer name, crop name, quantity, and email required'}), 400
 
     request_id = len(farmer_requests) + 1
     farmer_requests.append({
         'id': request_id,
+        'farmer_name': farmer_name,
         'crop_name': crop_name,
         'quantity': quantity,
+        'email': email,
         'condition': 'Pending'
     })
-    return jsonify({'message': 'Request submitted', 'request_id': request_id}), 200
+    return jsonify({'message': 'Request submitted successfully. Cold storage will review and update the condition.'}), 200
 
 @app.route('/api/crop-condition', methods=['GET'])
 def crop_condition():
@@ -116,6 +120,10 @@ def cold_storage_login():
 
 @app.route('/api/get-farmer-requests', methods=['GET'])
 def get_farmer_requests():
+    email = request.args.get('email')
+    if email:
+        filtered_requests = [req for req in farmer_requests if req.get('email') == email]
+        return jsonify(filtered_requests), 200
     return jsonify(farmer_requests), 200
 
 @app.route('/api/update-condition', methods=['POST'])
@@ -192,6 +200,13 @@ def get_market_prices():
                 'payment_procedure': ws_details['payment_procedure']
             })
     return jsonify(prices_list), 200
+
+@app.route('/api/get-test-otp', methods=['GET'])
+def get_test_otp():
+    email = request.args.get('email')
+    if email in otp_store:
+        return jsonify({'otp': otp_store[email]['otp']}), 200
+    return jsonify({'error': 'No OTP found'}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)

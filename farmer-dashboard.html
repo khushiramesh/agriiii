@@ -21,7 +21,6 @@
         <h1 data-lang-key="welcome_farmer">Welcome, Farmer!</h1>
         <div class="dashboard-buttons">
             <button id="open-storage-modal" data-lang-key="cold_storage_unit">Cold Storage Unit</button>
-            <button onclick="window.location.href='market-prices.html'" data-lang-key="view_market_prices">View Market Prices</button>
             <button id="view-condition-btn" data-lang-key="view_condition">View the Condition</button>
         </div>
 
@@ -31,6 +30,9 @@
                 <span class="close-button">&times;</span>
                 <h2 data-lang-key="req_storage">Request Storage Space</h2>
                 <form id="storage-form">
+                    <label for="farmer-name">Farmer Name:</label>
+                    <input type="text" id="farmer-name" required>
+
                     <label for="crop-name" data-lang-key="crop_name">Crop Name:</label>
                     <input type="text" id="crop-name" required>
 
