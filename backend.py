@@ -54,7 +54,7 @@ def send_otp():
     otp_store[email] = {'otp': otp, 'expires': expiry_time}
 
     # send email
-    msg = Message('Your OTP Code', sender=os.getenv("EMAIL_USER"), recipients=[email])
+    msg = Message('Your OTP Code', sender=("AgriBridge", os.getenv("EMAIL_USER")), recipients=[email])
     msg.body = f"Your OTP is {otp}. It expires in 5 minutes."
     try:
         mail.send(msg)

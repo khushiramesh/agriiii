@@ -343,6 +343,7 @@ if (viewConditionBtn) {
     const notificationContainer = document.getElementById('notification-container');
 
     function showNotification(message) {
+        if (!notificationContainer) return;
         const notification = document.createElement('div');
         notification.classList.add('notification');
         notification.textContent = message;
@@ -350,24 +351,10 @@ if (viewConditionBtn) {
 
         // Remove the notification after a few seconds
         setTimeout(() => {
-            notification.remove();
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 500);
         }, 5000);
     }
-
-    // Add CSS for notifications (in style.css)
-    /*
-    .notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background-color: #4CAF50;
-        color: white;
-        padding: 15px;
-        border-radius: 5px;
-        z-index: 1000;
-    }
-    */
-
 
     function renderMarketPrices(prices) {
         const currentLang = localStorage.getItem('language') || 'en';

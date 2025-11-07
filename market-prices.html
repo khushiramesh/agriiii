@@ -8,17 +8,22 @@
 </head>
 <body>
     <header>
-        <div>
-            <div class="logo-container">
-                <div class="logo-icon"></div>
-                <span class="logo-text">AGRIBRIDGE</span>
+        <div class="logo-area">
+            <div>
+                <a href="index.html" class="logo-container">
+                    <div class="logo-icon"></div>
+                    <span class="logo-text">AGRIBRIDGE</span>
+                </a>
+                <div class="tagline" data-lang-key="tagline">Connecting Farmers to a Smarter Market.</div>
             </div>
-            <div class="tagline" data-lang-key="tagline">Connecting Farmers to a Smarter Market.</div>
         </div>
     </header>
 
     <div class="container">
         <h1 data-lang-key="live_market_prices">Live Market Prices</h1>
+        <!-- Container for real-time notifications -->
+        <div id="notification-container"></div>
+
         <div id="market-prices-list">
             <!-- Sorted crop prices will be loaded here -->
         </div>
