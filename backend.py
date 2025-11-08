@@ -37,6 +37,7 @@ wholesalers = {
     'WS002': {'name': 'Wholesaler B', 'location': 'Mumbai', 'payment_procedure': 'Online Payment'}
 }
 crop_prices = {} # Prices set by wholesalers
+payments = [] # To store payment transaction info
 
 # In-memory store for real-time market prices (simulating a database)
 market_prices_store = []
@@ -196,6 +197,13 @@ def update_prices():
 def get_market_prices():
     # This now returns the centrally fetched market prices
     return jsonify(market_prices_store), 200
+
+@app.route("/api/payment-status", methods=["POST"])
+def payment_status():
+    data = request.json
+    # Save payment info to our in-memory list
+    payments.append(data)
+    return jsonify({"message": "Payment info recorded"})
 
 @app.route('/api/get-test-otp', methods=['GET'])
 def get_test_otp():

@@ -42,6 +42,38 @@
                 <button type="submit" data-lang-key="update_prices">Update Prices</button>
             </form>
         </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+          <h3>📍 Location Access</h3>
+        
+          <!-- Button to open user's real current location -->
+          <button onclick="getCurrentLocation()" 
+                  style="padding:10px 20px; border:none; border-radius:8px; background-color:#4CAF50; color:white; cursor:pointer; margin:5px;">
+            Open My Current Location
+          </button>
+        
+          <!-- Button to open market or cold storage -->
+          <button onclick="openSpecificLocation()" 
+                  style="padding:10px 20px; border:none; border-radius:8px; background-color:#2196F3; color:white; cursor:pointer; margin:5px;">
+            Open Market Location
+          </button>
+        </div>
+
+        <div style="text-align:center; margin-top:20px;">
+          <h3>💰 Make Payment</h3>
+        
+          <!-- Google Pay -->
+          <a href="upi://pay?pa=merchant@okgooglepay&pn=AgriBridge&tn=Crop Payment&am=100&cu=INR" 
+             style="padding:10px 20px; margin:5px; background-color:#34A853; color:white; border-radius:8px; text-decoration:none; display:inline-block;">
+            Pay with Google Pay
+          </a>
+        
+          <!-- PhonePe -->
+          <a href="upi://pay?pa=merchant@phonepe&pn=AgriBridge&tn=Crop Payment&am=100&cu=INR" 
+             style="padding:10px 20px; margin:5px; background-color:#FF6600; color:white; border-radius:8px; text-decoration:none; display:inline-block;">
+            Pay with PhonePe
+          </a>
+        </div>
     </div>
 
     <footer>

@@ -417,3 +417,29 @@ if (viewConditionBtn) {
     }
 
 });
+
+// ✅ Function for user's actual current location
+function getCurrentLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function (position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+        window.open(locationUrl, "_blank"); // Opens real Google Maps
+      },
+      function (error) {
+        alert("Unable to access location. Please enable GPS or location permission.");
+      }
+    );
+  } else {
+    alert("Geolocation is not supported by your browser.");
+  }
+}
+
+// ✅ Function for real market/cold storage location
+function openSpecificLocation() {
+  const marketAddress = "Kadur Cold Storage, Chikkamagaluru, Karnataka"; // 🔁 Replace with your actual place name or coordinates
+  const locationUrl = `https://www.google.com/maps?q=${encodeURIComponent(marketAddress)}`;
+  window.open(locationUrl, "_blank");
+}

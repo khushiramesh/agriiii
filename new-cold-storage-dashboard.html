@@ -100,6 +100,22 @@
                 <button type="submit" class="btn" data-lang-key="save_condition">Save Condition</button>
                 <div id="new-update-message" class="success-message"></div>
             </form>
+
+            <div style="text-align: center; margin-top: 20px;">
+              <h3>📍 Location Access</h3>
+            
+              <!-- Button to open user's real current location -->
+              <button onclick="getCurrentLocation()" 
+                      style="padding:10px 20px; border:none; border-radius:8px; background-color:#4CAF50; color:white; cursor:pointer; margin:5px;">
+                Open My Current Location
+              </button>
+            
+              <!-- Button to open market or cold storage -->
+              <button onclick="openSpecificLocation()" 
+                      style="padding:10px 20px; border:none; border-radius:8px; background-color:#2196F3; color:white; cursor:pointer; margin:5px;">
+                Open Market Location
+              </button>
+            </div>
         </div>
     </div>
 
