@@ -38,6 +38,7 @@ wholesalers = {
 }
 crop_prices = {} # Prices set by wholesalers
 payments = [] # To store payment transaction info
+vehicle_requests = [] # To store vehicle service requests
 
 # In-memory store for real-time market prices (simulating a database)
 market_prices_store = []
@@ -197,6 +198,49 @@ def update_prices():
 def get_market_prices():
     # This now returns the centrally fetched market prices
     return jsonify(market_prices_store), 200
+
+@app.route('/api/request-vehicle', methods=['POST'])
+def request_vehicle():
+    data = request.json
+    farmer_name = data.get('farmer_name')
+    contact_email = data.get('contact_email')
+    pickup_location = data.get('pickup_location')
+    destination = data.get('destination')
+    crop_name = data.get('crop_name')
+    quantity = data.get('quantity')
+
+    if not all([farmer_name, contact_email, pickup_location, destination, crop_name, quantity]):
+        return jsonify({'error': 'Missing required fields for vehicle request'}), 400
+
+    request_id = len(vehicle_requests) + 1
+    new_request = {
+        'id': request_id,
+        'farmer_name': farmer_name,
+        'contact_email': contact_email,
+        'pickup_location': pickup_location,
+        'destination': destination,
+        'crop_name': crop_name,
+        'quantity': quantity,
+        'status': 'Pending'  # Initial status
+    }
+    vehicle_requests.append(new_request)
+
+    return jsonify({'message': 'Vehicle request submitted successfully', 'request_id': request_id}), 201
+
+@app.route('/api/get-vehicle-requests', methods=['GET'])
+def get_vehicle_requests():
+    return jsonify(vehicle_requests), 200
+
+@app.route('/api/update-vehicle-request', methods=['POST'])
+def update_vehicle_request():
+    data = request.json
+    request_id = data.get('request_id')
+    status = data.get('status')
+    for req in vehicle_requests:
+        if req['id'] == request_id:
+            req['status'] = status
+            return jsonify({'message': f'Vehicle request {request_id} status updated to {status}'}), 200
+    return jsonify({'error': 'Vehicle request not found'}), 404
 
 @app.route("/api/payment-status", methods=["POST"])
 def payment_status():
