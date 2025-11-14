@@ -33,12 +33,13 @@ otp_store = {}  # key: email, value: { otp: '123456', expires: datetime }
 # In-memory storage for demo purposes (replace with database in production)
 farmer_requests = []
 wholesalers = {
-    'WS001': {'name': 'Wholesaler A', 'location': 'Delhi', 'payment_procedure': 'Cash on Delivery'},
-    'WS002': {'name': 'Wholesaler B', 'location': 'Mumbai', 'payment_procedure': 'Online Payment'}
+    'WS001': {'name': 'Wholesaler A', 'location': 'Delhi', 'payment_procedure': 'Cash on Delivery', 'email': 'wholesaler.a@example.com'}, # Added for testing
+    'WS002': {'name': 'Wholesaler B', 'location': 'Mumbai', 'payment_procedure': 'Online Payment', 'email': 'wholesaler.b@example.com'} # Added for testing
 }
 crop_prices = {} # Prices set by wholesalers
 payments = [] # To store payment transaction info
 vehicle_requests = [] # To store vehicle service requests
+
 
 # In-memory store for real-time market prices (simulating a database)
 market_prices_store = []
@@ -46,14 +47,16 @@ market_prices_store = []
 @app.route('/api/send-otp', methods=['POST'])
 def send_otp():
     data = request.get_json() or request.form
-    email = data.get('email')
+    email = data.get('email').strip().lower() if data.get('email') else None
     if not email:
         return jsonify({'error': 'Email is required'}), 400
 
+    # Name is optional, only required for wholesaler flow
+    name = data.get('name')
+
     otp = str(random.randint(100000, 999999))
     expiry_time = datetime.now() + timedelta(minutes=5)  # OTP valid for 5 minutes
-
-    otp_store[email] = {'otp': otp, 'expires': expiry_time}
+    otp_store[email] = {'otp': otp, 'expires': expiry_time, 'name': name} # Store name if provided
 
     # send email
     msg = Message('Your OTP Code', sender=("AgriBridge", os.getenv("EMAIL_USER")), recipients=[email])
@@ -67,11 +70,14 @@ def send_otp():
 @app.route('/api/verify-otp', methods=['POST'])
 def verify_otp():
     data = request.get_json() or request.form
-    email = data.get('email')
-    user_otp = data.get('otp')
+    email = data.get('email').strip().lower() if data.get('email') else None
+    user_otp = data.get('otp').strip() if data.get('otp') else None
+
+    if not email or not user_otp:
+        return jsonify({'error': 'Email and OTP are required'}), 400
 
     if email not in otp_store:
-        return jsonify({'error': 'No OTP sent to this email'}), 400
+        return jsonify({'error': 'No OTP sent to this email or OTP expired'}), 400
 
     stored_otp = otp_store[email]['otp']
     expires = otp_store[email]['expires']
@@ -149,11 +155,32 @@ def update_condition():
 @app.route('/api/wholesaler-login', methods=['POST'])
 def wholesaler_login():
     data = request.json
-    wholesaler_id = data.get('wholesaler_id')
-    if wholesaler_id in wholesalers:
-        return jsonify({'message': 'Login successful'}), 200
-    else:
-        return jsonify({'error': 'Invalid wholesaler ID'}), 400
+    name = data.get('name').strip().lower() if data.get('name') else None
+    email = data.get('email').strip().lower() if data.get('email') else None
+    user_otp = data.get('otp').strip() if data.get('otp') else None
+
+    if not email or not name or not user_otp:
+        return jsonify({'error': 'Email, Name, and OTP are required'}), 400
+
+    if email not in otp_store:
+        return jsonify({'error': 'No OTP sent to this email or OTP expired'}), 400
+
+    stored_otp_info = otp_store[email]
+    if datetime.now() > stored_otp_info['expires']:
+        del otp_store[email]
+        return jsonify({'error': 'OTP expired'}), 400
+
+    if user_otp != stored_otp_info['otp']:
+        return jsonify({'error': 'Invalid OTP'}), 400
+
+    # OTP is valid, now verify wholesaler details
+    del otp_store[email] # OTP used, remove it
+
+    # Find wholesaler by email
+    for wholesaler_id, details in wholesalers.items():
+        if details.get('email').strip().lower() == email and details.get('name').strip().lower() == name: # Match both email and name, normalized
+            return jsonify({'message': 'Login successful', 'wholesaler_id': wholesaler_id}), 200
+    return jsonify({'error': 'Wholesaler not found with this email and name combination'}), 404
 
 @app.route('/api/get-wholesaler-details', methods=['GET'])
 def get_wholesaler_details():

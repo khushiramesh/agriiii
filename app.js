@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+         const name = document.getElementById('name').value;
         const email = document.getElementById('email').value;
         const emailErrorEl = document.getElementById('email-error');
 
@@ -51,7 +52,7 @@ if (loginForm) {
         const response = await fetch(`${API_BASE_URL}/api/send-otp`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email })
+            body: JSON.stringify({ name: name, email: email })
         });
 
         if (response.ok) {
@@ -68,11 +69,12 @@ if (loginForm) {
 if (resendBtn) {
     resendBtn.addEventListener('click', async () => {
         clearInterval(otpTimer);
+        const name = document.getElementById('name').value;
         const email = document.getElementById('email').value;
         const response = await fetch(`${API_BASE_URL}/api/send-otp`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email })
+            body: JSON.stringify({ name: name, email: email })
         });
         if (response.ok) {
             alert('OTP resent successfully.');
@@ -85,8 +87,8 @@ if (resendBtn) {
 if (otpForm) {
     otpForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const email = document.getElementById('email').value;
-        const otp = document.getElementById('otp-input').value;
+        const email = document.getElementById('email').value.trim().toLowerCase();
+        const otp = document.getElementById('otp-input').value.trim();
 
         const response = await fetch(`${API_BASE_URL}/api/verify-otp`, {
             method: 'POST',
@@ -98,7 +100,8 @@ if (otpForm) {
             localStorage.setItem('farmerEmail', email);
             window.location.href = 'farmer-dashboard.html';
         } else {
-            otpErrorEl.textContent = 'Invalid OTP';
+            const errorData = await response.json();
+            otpErrorEl.textContent = errorData.error;
         }
     });
 }
@@ -246,23 +249,89 @@ if (viewConditionBtn) {
     }
 
     // --- Wholesaler Login Page Logic ---
-    const wsLoginForm = document.getElementById('wholesaler-login-form');
-    if (wsLoginForm) {
-        wsLoginForm.addEventListener('submit', async (e) => {
+    const wholesalerEmailForm = document.getElementById('wholesaler-email-form');
+    const wholesalerOtpContainer = document.getElementById('wholesaler-otp-container');
+    const wholesalerOtpForm = document.getElementById('wholesaler-otp-form');
+    const wholesalerResendBtn = document.getElementById('wholesaler-resend-otp');
+    let wholesalerOtpTimer;
+
+    function startWholesalerOtpTimer() {
+        const timerEl = document.getElementById('wholesaler-timer');
+        let timeLeft = 180; // 3 minutes
+        wholesalerResendBtn.disabled = true;
+        timerEl.textContent = `Seconds left: ${timeLeft}`;
+        wholesalerOtpTimer = setInterval(() => {
+            timeLeft--;
+            timerEl.textContent = `Seconds left: ${timeLeft}`;
+            if (timeLeft <= 0) {
+                clearInterval(wholesalerOtpTimer);
+                wholesalerResendBtn.disabled = false;
+                timerEl.textContent = 'Time up, you can resend OTP';
+            }
+        }, 1000);
+    }
+
+    if (wholesalerEmailForm) {
+        wholesalerEmailForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const wholesalerId = document.getElementById('wholesaler-id').value;
-            const response = await fetch(`${API_BASE_URL}/api/wholesaler-login`, {
+            const name = document.getElementById('wholesaler-name').value; // Get name
+            const email = document.getElementById('wholesaler-email').value;
+            const emailErrorEl = document.getElementById('wholesaler-email-error');
+            emailErrorEl.textContent = '';
+
+            // Call the Python backend to send an OTP
+            const response = await fetch(`${API_BASE_URL}/api/send-otp`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ wholesaler_id: wholesalerId })
+                headers: { 'Content-Type': 'application/json' }, // Send name along with email
+                body: JSON.stringify({ name, email })
             });
 
             if (response.ok) {
-                // Store wholesaler ID to use on the dashboard
-                localStorage.setItem('wholesalerId', wholesalerId);
+                document.getElementById('login-form-container').classList.add('hidden');
+                wholesalerOtpContainer.classList.remove('hidden');
+                startWholesalerOtpTimer();
+            } else {
+                emailErrorEl.textContent = 'Failed to send OTP. Is the email registered?';
+            }
+        });
+    }
+
+    if (wholesalerResendBtn) {
+        wholesalerResendBtn.addEventListener('click', async () => {
+            clearInterval(wholesalerOtpTimer);
+            const name = document.getElementById('wholesaler-name').value; // Get name for resend
+            const email = document.getElementById('wholesaler-email').value;
+            await fetch(`${API_BASE_URL}/api/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }, // Send name for resend
+                body: JSON.stringify({ name, email })
+            });
+            alert('OTP resent successfully.');
+            startWholesalerOtpTimer();
+        });
+    }
+
+    if (wholesalerOtpForm) {
+        wholesalerOtpForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('wholesaler-email').value.trim().toLowerCase();
+            const name = document.getElementById('wholesaler-name').value.trim().toLowerCase(); // Get name for verification
+            const otp = document.getElementById('wholesaler-otp-input').value.trim();
+
+            // Send email, name, and OTP to the wholesaler-login endpoint
+            const response = await fetch(`${API_BASE_URL}/api/wholesaler-login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, otp })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('wholesalerId', data.wholesaler_id);
                 window.location.href = 'wholesaler-dashboard.html';
             } else {
-                document.getElementById('login-error').textContent = 'Invalid Wholesaler ID. Please try again.';
+                const errorData = await response.json();
+                document.getElementById('wholesaler-otp-error').textContent = errorData.error;
             }
         });
     }
@@ -429,7 +498,7 @@ function getCurrentLocation() {
         window.open(locationUrl, "_blank"); // Opens real Google Maps
       },
       function (error) {
-        alert("Unable to access location. Please enable GPS or location permission.");
+        alert("Unable to access your real location. Please allow location access in browser.");
       }
     );
   } else {
