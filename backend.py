@@ -173,14 +173,24 @@ def wholesaler_login():
     if user_otp != stored_otp_info['otp']:
         return jsonify({'error': 'Invalid OTP'}), 400
 
-    # OTP is valid, now verify wholesaler details
-    del otp_store[email] # OTP used, remove it
-
-    # Find wholesaler by email
+    # Find wholesaler by email first
+    found_wholesaler = None
     for wholesaler_id, details in wholesalers.items():
-        if details.get('email').strip().lower() == email and details.get('name').strip().lower() == name: # Match both email and name, normalized
-            return jsonify({'message': 'Login successful', 'wholesaler_id': wholesaler_id}), 200
-    return jsonify({'error': 'Wholesaler not found with this email and name combination'}), 404
+        if details.get('email').strip().lower() == email:
+            found_wholesaler = (wholesaler_id, details)
+            break # Found the email, no need to search further
+
+    if not found_wholesaler:
+        return jsonify({'error': 'No wholesaler is registered with this email address'}), 404
+
+    # Now that we've found the user by email, check if the name matches
+    wholesaler_id, details = found_wholesaler
+    if details.get('name').strip().lower() != name:
+        return jsonify({'error': f"Name does not match the record for {email}"}), 400
+
+    # All checks passed, now delete the OTP and log them in
+    del otp_store[email]
+    return jsonify({'message': 'Login successful', 'wholesaler_id': wholesaler_id}), 200
 
 @app.route('/api/get-wholesaler-details', methods=['GET'])
 def get_wholesaler_details():
@@ -291,6 +301,44 @@ def index():
 def static_files(path):
     return send_from_directory('.', path)
 
+@app.route('/api/get-farmers', methods=['GET'])
+def get_farmers():
+    # Replace this with actual database retrieval in a real application
+    farmers = [
+        {'id': 1, 'name': 'Farmer A', 'email': 'farmer.a@example.com'},
+        {'id': 2, 'name': 'Farmer B', 'email': 'farmer.b@example.com'},
+    ]
+    return jsonify(farmers), 200
+
+@app.route('/api/save-condition', methods=['POST'])
+def save_condition():
+    data = request.json
+    wholesaler_id = data.get('wholesaler_id')
+    farmer_id = data.get('farmer_id')
+    condition_details = data.get('condition_details')  # Example: {'temperature': '25C', 'humidity': '60%'}
+
+    if not all([wholesaler_id, farmer_id, condition_details]):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    #  Store the condition details in a database, associating it with the wholesaler and farmer.
+    #  In this example, I'll use an in-memory list:
+    condition_entry = {
+        'wholesaler_id': wholesaler_id,
+        'farmer_id': farmer_id,
+        'condition_details': condition_details,
+        'timestamp': datetime.now().isoformat()
+    }
+    # You would replace this with a database insertion.
+    # condition_records.append(condition_entry) # Assuming you have condition_records defined somewhere
+    print(f"Condition saved: {condition_entry}")  # Replace with actual logging
+    return jsonify({'message': 'Condition saved successfully'}), 201
+
+@app.route('/api/get-farmer-conditions', methods=['GET'])
+def get_farmer_conditions():
+    farmer_email = request.args.get('email') #Get farmer ID or email
+    conditions = [{'wholesaler_id': 'WS001', 'condition_details': {'temp': '20C'}},{'wholesaler_id': 'WS002', 'condition_details': {'temp': '22C'}}]
+
+    return jsonify(conditions), 200
 def fetch_and_update_market_prices():
     """
     Fetches real-time market prices from an external API (e.g., Agmarknet)
