@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - AgriBridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="logo-area">
+            <div>
+                <a href="/" class="logo-container">
+                    <div class="logo-icon"></div>
+                    <span class="logo-text">AGRIBRIDGE</span>
+                </a>
+                <div class="tagline">Connecting Farmers to a Smarter Market.</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Welcome, {{ name }}!</h1>
+        <h3>Your branch info is submitted and farmers are notified.</h3>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 AgriBridge</p>
+    </footer>
+</body>
+</html>

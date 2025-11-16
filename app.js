@@ -117,6 +117,9 @@ if (otpForm) {
     const viewConditionBtn = document.getElementById('view-condition-btn');
     const conditionInfo = document.getElementById('condition-info');
     const conditionData = document.getElementById('condition-data');
+    const viewNotificationsBtn = document.getElementById('view-notifications-btn');
+    const notificationsInfo = document.getElementById('notifications-info');
+    const notificationsData = document.getElementById('notifications-data');
 
     if (openModalBtn) {
         openModalBtn.addEventListener('click', () => storageModal.classList.remove('hidden'));
@@ -176,6 +179,27 @@ if (viewConditionBtn) {
         }
 
         conditionInfo.classList.toggle('hidden');
+    });
+}
+
+if (viewNotificationsBtn) {
+    viewNotificationsBtn.addEventListener('click', async () => {
+        const response = await fetch(`${API_BASE_URL}/api/get_notifications`);
+        const notifications = await response.json();
+
+        if (notifications.length === 0) {
+            notificationsData.textContent = 'No new notifications.';
+        } else {
+            notificationsData.innerHTML = notifications.map(notification => `
+                <div class="notification-item">
+                    <p><b>Type:</b> ${notification.type}</p>
+                    <p>${notification.message}</p>
+                    <p><small>${new Date(notification.timestamp).toLocaleString()}</small></p>
+                </div>
+            `).join('');
+        }
+
+        notificationsInfo.classList.toggle('hidden');
     });
 }
 
@@ -339,6 +363,7 @@ if (viewConditionBtn) {
     // --- Wholesaler Dashboard Logic ---
     const priceUpdateForm = document.getElementById('price-update-form');
     const detailsUpdateForm = document.getElementById('details-update-form');
+    const branchInfoForm = document.getElementById('branch-info-form');
 
     if (detailsUpdateForm) { // Check if we are on the wholesaler dashboard
         const wholesalerId = localStorage.getItem('wholesalerId');
@@ -372,7 +397,29 @@ if (viewConditionBtn) {
             }
         });
 
-        // 3. Fetch and render crop pricing form
+        // 3. Handle branch info submission
+        if (branchInfoForm) {
+            branchInfoForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const city = document.getElementById('city').value;
+                const cold_storage = document.getElementById('cold-storage').value;
+                const trays = document.getElementById('trays').value;
+
+                const response = await fetch(`${API_BASE_URL}/api/submit-branch-info`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ wholesaler_id: wholesalerId, city, cold_storage, trays })
+                });
+
+                if (response.ok) {
+                    alert('Branch info submitted successfully!');
+                } else {
+                    alert('Failed to submit branch info.');
+                }
+            });
+        }
+
+        // 4. Fetch and render crop pricing form
         if (priceUpdateForm) {
             const cropPricingList = document.getElementById('crop-pricing-list');
             const cropsResponse = await fetch(`${API_BASE_URL}/api/get-crops-for-pricing`);
@@ -385,7 +432,7 @@ if (viewConditionBtn) {
                 </div>
             `).join('');
 
-            // 4. Handle price update submission
+            // 5. Handle price update submission
             priceUpdateForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const prices = {};

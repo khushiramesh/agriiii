@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Branch Information - AgriBridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="logo-area">
+            <div>
+                <a href="/" class="logo-container">
+                    <div class="logo-icon"></div>
+                    <span class="logo-text">AGRIBRIDGE</span>
+                </a>
+                <div class="tagline">Connecting Farmers to a Smarter Market.</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Submit Your Branch Information</h2>
+        <form action="/wholesaler/branch" method="POST">
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" required>
+
+            <label for="cold_storage">Cold Storage Available (1 for Yes, 0 for No):</label>
+            <input type="number" id="cold_storage" name="cold_storage" min="0" max="1" required>
+
+            <label for="trays">Number of Trays Available:</label>
+            <input type="number" id="trays" name="trays" required>
+
+            <button type="submit">Submit Information</button>
+        </form>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="/">Home</a>
+            <a href="/about.html">About Us</a>
+        </div>
+    </footer>
+</body>
+</html>

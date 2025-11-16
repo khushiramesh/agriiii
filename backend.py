@@ -39,6 +39,8 @@ wholesalers = {
 crop_prices = {} # Prices set by wholesalers
 payments = [] # To store payment transaction info
 vehicle_requests = [] # To store vehicle service requests
+wholesaler_branches = [] # To store wholesaler branch info
+notifications = [] # To store notifications for farmers
 
 
 # In-memory store for real-time market prices (simulating a database)
@@ -339,6 +341,42 @@ def get_farmer_conditions():
     conditions = [{'wholesaler_id': 'WS001', 'condition_details': {'temp': '20C'}},{'wholesaler_id': 'WS002', 'condition_details': {'temp': '22C'}}]
 
     return jsonify(conditions), 200
+
+@app.route('/api/submit-branch-info', methods=['POST'])
+def submit_branch_info():
+    data = request.json
+    wholesaler_id = data.get('wholesaler_id')
+    city = data.get('city')
+    cold_storage = data.get('cold_storage')
+    trays = data.get('trays')
+
+    if not all([wholesaler_id, city, cold_storage, trays]):
+        return jsonify({'error': 'All fields are required'}), 400
+
+    branch_info = {
+        'wholesaler_id': wholesaler_id,
+        'city': city,
+        'cold_storage': cold_storage,
+        'trays': int(trays),
+        'timestamp': datetime.now().isoformat()
+    }
+    wholesaler_branches.append(branch_info)
+
+    # Create notification for farmers
+    notification = {
+        'id': len(notifications) + 1,
+        'type': 'wholesaler_availability',
+        'message': f'New wholesaler availability in {city}: {cold_storage} with {trays} trays.',
+        'wholesaler_id': wholesaler_id,
+        'timestamp': datetime.now().isoformat()
+    }
+    notifications.append(notification)
+
+    return jsonify({'message': 'Branch info submitted successfully'}), 200
+
+@app.route('/api/get_notifications', methods=['GET'])
+def get_notifications():
+    return jsonify(notifications), 200
 def fetch_and_update_market_prices():
     """
     Fetches real-time market prices from an external API (e.g., Agmarknet)

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - AgriBridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="logo-area">
+            <div>
+                <a href="/" class="logo-container">
+                    <div class="logo-icon"></div>
+                    <span class="logo-text">AGRIBRIDGE</span>
+                </a>
+                <div class="tagline">Connecting Farmers to a Smarter Market.</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h2>Verify OTP</h2>
+        <p>{{ message }}</p>
+        {% if error %}
+            <p style="color: red;">{{ error }}</p>
+        {% endif %}
+        <form action="/wholesaler/verify_otp" method="POST">
+            <label for="otp">Enter OTP:</label>
+            <input type="text" id="otp" name="otp" required maxlength="6">
+            <button type="submit">Verify</button>
+        </form>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="/">Home</a>
+            <a href="/about.html">About Us</a>
+        </div>
+    </footer>
+</body>
+</html>
